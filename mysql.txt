@@ -1,0 +1,20 @@
+apt-get install mysql-server
+apt-get install mysql-client
+apt-get install libmysql++
+
+service mysql status
+service mysql start
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_passwword BY 'passwd';
+FLUSH PRIVILEGES;
+
+update user set host='%' where user='root';
+FLUSH PRIVILEGES;
+
+
+sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
+#bind-address = 127.0.0.1
+
+sudo ufw allow 3306
+sudo ufw reload
+sudo ufw enable

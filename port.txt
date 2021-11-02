@@ -1,0 +1,2 @@
+nc -lk 9006
+netstat -an | grep 9006
