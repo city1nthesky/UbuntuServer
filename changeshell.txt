@@ -1,3 +1,5 @@
 chsh -s /usr/bin/fish
 chsh -s `which fish`
 
+
+/etc/shells
