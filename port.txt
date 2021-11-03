@@ -2,3 +2,5 @@ nc -lk 9006
 netstat -an | grep 9006
 netstat -an
 netstat -ant
+
+#check your firewall and open your port (iptables)

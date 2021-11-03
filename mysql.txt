@@ -14,5 +14,10 @@ CREATE TABLE user(
 // 添加数据
 INSERT INTO user(username, passwd) VALUES('name', 'passwd');
 
+#open your server port to everyone(look port.txt)
 
+##the method provided by a friend on the github but not verify
+## **给root开启可远程登录**
+ALTER user 'root'@'%' IDENTIFIED WITH mysql_native_password BY '123123';
+FLUSH PRIVILEGES;
 
