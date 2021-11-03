@@ -17,7 +17,12 @@ INSERT INTO user(username, passwd) VALUES('name', 'passwd');
 #open your server port to everyone(look port.txt)
 
 ##the method provided by a friend on the github but not verify
+question:
+server: webserver.cpp:131: void WebServer::eventListen(): Assertion `ret >= 0' failed.
+Aborted (core dumped)
+
 ## **给root开启可远程登录**
+method:
 ALTER user 'root'@'%' IDENTIFIED WITH mysql_native_password BY '123123';
 FLUSH PRIVILEGES;
 
