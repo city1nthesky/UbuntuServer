@@ -21,3 +21,6 @@ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
 sudo ufw allow 3306
 sudo ufw reload
 sudo ufw enable
+
+
+mysql -u root -p
