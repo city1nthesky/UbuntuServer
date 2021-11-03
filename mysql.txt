@@ -1,5 +1,8 @@
 apt-get install mysql-server
 apt-get install mysql-client
+#the method provided by the author
+apt-get install libmysqlclient-dev
+#the method provided bt the net
 apt-get install libmysql++
 
 service mysql status
