@@ -2,7 +2,7 @@ apt-get install mysql-server
 apt-get install mysql-client
 #the method provided by the author
 apt-get install libmysqlclient-dev
-#the method provided bt the net
+#the method provided by the net
 apt-get install libmysql++
 
 service mysql status
@@ -21,3 +21,7 @@ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
 sudo ufw allow 3306
 sudo ufw reload
 sudo ufw enable
+
+#the method provided by a friend on the github 
+ALTER user 'root'@'%' IDENTIFIED WITH mysql_native_password BY '123123';
+FLUSH PRIVILEGES;
