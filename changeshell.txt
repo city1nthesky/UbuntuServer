@@ -1,5 +1,7 @@
 chsh -s /usr/bin/fish
 chsh -s `which fish`
+change /etc/passwd
+root:x:0:0:root:/root:/usr/bin/fish
 
 
 /etc/shells
