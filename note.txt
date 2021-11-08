@@ -12,3 +12,39 @@
 服务器采用了fork的话，要收集垃圾进程，防止僵尸进程的产生，可以这样处理： 
 　　signal(SIGCHLD,SIG_IGN); 交给系统init去回收。 
 　　这里子进程就不会产生僵尸进程了。 
+
+SA_RESTART
+
+使用这个flag会让被信号打断的一些原语（如open，read和write）“正常返回”。为什么会是正常返回呢？由于在进行open或者read等操作时，信号量达到后，系统会先处理信号量的，但是这里就有一个问题，
+信号量处理完后，被打断的系统调用怎么处理呢？POSIX规定对于这种情况的处理是直接返回，并且要把errno设置为EINTR。但是这样是很不方便的，因为使用信号量的函数必须在每一次系统调用后就都要确认
+是否是信号量打断，程序员很容易忘记确认，这就很容易导致程序的bug。
+
+
+
+description: #include<signal.h>
+int sigfillset(sigset_t * set);
+sigfillset()用来将参数set信号集初始化，然后把所有的信号加入到此信号集里即将所有的信号标志位置为1，屏蔽所有的信号。它是一个宏实现，如下所示：
+#define sigfillset(ptr) ( *(ptr) = ~(sigset_t)0, 0)
+
+因为函数sigfillset必须返回0，所以使用C语言里面的逗号运算符，它将逗号运算符后的值做为表达式的值返回。函数在执行成功时则返回0；如果有错误则返回-1，并设置errno的值，如果errno的值为EFAULT，
+则表示参数set指针地址无法存取。
+
+
+description: #include <signal.h>
+int sigaction(int signum, const struct sigaction *act,struct sigaction *oldact);
+sigaction() 系统调用用于更改进程在接收到特定信号时采取的操作。signum 指定信号并且可以是除 SIGKILL 和 SIGSTOP 之外的任何有效信号。 如果act 为非NULL，则从act 安装信号signum 的新操作。
+如果 oldact 为非 NULL，则先前的操作将保存在 oldact
+中。 sigaction 结构定义为：
+struct sigaction {
+     void     (*sa_handler)(int);
+     void     (*sa_sigaction)(int, siginfo_t *, void *);
+     sigset_t   sa_mask;
+     int        sa_flags;
+     void     (*sa_restorer)(void);
+ };
+
+
+description:#include <assert.h>
+void assert( int expression );
+assert的作用是现计算表达式 expression ，如果其值为假（即为0），那么它先向stderr打印一条出错信息，然后通过调用 abort 来终止程序运行。
+已放弃使用assert()的缺点是，频繁的调用会极大的影响程序的性能，增加额外的开销。在调试结束后，可以通过在包含#include <assert.h>的语句之前插入 #define NDEBUG 来禁用assert调用

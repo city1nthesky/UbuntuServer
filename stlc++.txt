@@ -1,0 +1,45 @@
+vector ： vector和built-in数组类似，拥有一段连续的内存空间，能非常好的支持随即存取，即[]操作符，但由于它的内存空间是连续的，所以在中间进行插入
+和删除会造成内存块的拷贝，另外，当插入较多的元素后，预留内存空间可能不够，需要重新申请一块足够大的内存并把原来的数据拷贝到新的内存空间。这些影
+响了vector的效率，但是实际上用的最多的还是vector容器，建议大多数时候使用vector效率一般是不错的
+
+list：list就是数据结构中的双向链表(根据sgi stl源代码)，因此它的内存空间是不连续的，通过指针来进行数据的访问，这个特点使得它的随即存取变的非常
+没有效率，因此它没有提供[]操作符的重载。但由于链表的特点，它可以以很好的效率支持任意地方的删除和插入
+
+deque： deque是一个double-ended queue，它的具体实现不太清楚，但知道它具有以下两个特点：它支持[]操作符，也就是支持随即存取，并且和vector的效率
+相差无几，它支持在两端的操作：push_back,push_front,pop_back,pop_front等，并且在两端操作上与list的效率也差不多
+
+list() 声明一个空列表；
+list(n) 声明一个有n个元素的列表，每个元素都是由其默认构造函数T()构造出来的
+list(n,val) 声明一个由n个元素的列表，每个元素都是由其复制构造函数T(val)得来的
+list(n,val) 声明一个和上面一样的列表
+list(first,last) 声明一个列表，其元素的初始值来源于由区间所指定的序列中的元素
+
+begin()和end()：通过调用list容器的成员函数begin()得到一个指向容器起始位置的iterator，可以调用list容器的 end() 函数来得到list末端下一位置，相
+当于：int a[n]中的第n+1个位置a[n]，实际上是不存在的，不能访问，经常作为循环结束判断结束条件使用。
+
+push_back() 和push_front()：使用list的成员函数push_back和push_front插入一个元素到list中。其中push_back()从list的末端插入，而push_front()实现的
+从list的头部插入
+
+empty()：利用empty() 判断list是否为空
+
+resize()： 如果调用resize(n)将list的长度改为只容纳n个元素，超出的元素将被删除，如果需要扩展那么调用默认构造函数T()将元素加到list末端。如果调用
+resize(n,val)，则扩展元素要调用构造函数T(val)函数进行元素构造，其余部分相同
+
+clear()： 清空list中的所有元素
+
+front()和back()： 通过front()可以获得list容器中的头部元素，通过back()可以获得list容器的最后一个元素。但是有一点要注意，就是list中元素是空的时
+候，这时候调用front()和back()会发生什么呢？实际上会发生不能正常读取数据的情况，但是这并不报错，那我们编程序时就要注意了，个人觉得在使用之前最
+好先调用empty()函数判断list是否为空
+
+pop_back和pop_front()：通过删除最后一个元素，通过pop_front()删除第一个元素；序列必须不为空，如果当list为空的时候调用pop_back()和pop_front()会
+使程序崩掉
+
+assign()：具体和vector中的操作类似，也是有两种情况，第一种是：l1.assign(n,val)将 l1中元素变为n个T(val）。第二种情况是：l1.assign(l2.begin(),l2
+.end())将l2中的从l2.begin()到l2.end()之间的数值赋值给l1
+
+swap()：交换两个链表(两个重载)，一个是l1.swap(l2); 另外一个是swap(l1,l2)，都可能完成连个链表的交换
+
+reverse()：通过reverse()完成list的逆置
+
+merge()：合并两个链表并使之默认升序(也可改)，l1.merge(l2，greater<int>()); 调用结束后l2变为空，l1中元素包含原来l1 和 l2中的元素，并且排好序，
+升序。其实默认是升序，greater<int>()可以省略，另外greater<int>()是可以变的，也可以不按升序排列
