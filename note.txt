@@ -26,13 +26,14 @@ int sigfillset(sigset_t * set);
 sigfillset()用来将参数set信号集初始化，然后把所有的信号加入到此信号集里即将所有的信号标志位置为1，屏蔽所有的信号。它是一个宏实现，如下所示：
 #define sigfillset(ptr) ( *(ptr) = ~(sigset_t)0, 0)
 
-因为函数sigfillset必须返回0，所以使用C语言里面的逗号运算符，它将逗号运算符后的值做为表达式的值返回。函数在执行成功时则返回0；如果有错误则返回-1，并设置errno的值，如果errno的值为EFAULT，
-则表示参数set指针地址无法存取。
+因为函数sigfillset必须返回0，所以使用C语言里面的逗号运算符，它将逗号运算符后的值做为表达式的值返回。函数在执行成功时则返回0；如果有错误则返回
+-1，并设置errno的值，如果errno的值为EFAULT，则表示参数set指针地址无法存取。
 
 
 description: #include <signal.h>
 int sigaction(int signum, const struct sigaction *act,struct sigaction *oldact);
-sigaction() 系统调用用于更改进程在接收到特定信号时采取的操作。signum 指定信号并且可以是除 SIGKILL 和 SIGSTOP 之外的任何有效信号。 如果act 为非NULL，则从act 安装信号signum 的新操作。
+sigaction() 系统调用用于更改进程在接收到特定信号时采取的操作。signum 指定信号并且可以是除 SIGKILL 和 SIGSTOP 之外的任何有效信号。 如果act 为非
+NULL，则从act 安装信号signum 的新操作。
 如果 oldact 为非 NULL，则先前的操作将保存在 oldact
 中。 sigaction 结构定义为：
 struct sigaction {
@@ -47,4 +48,139 @@ struct sigaction {
 description:#include <assert.h>
 void assert( int expression );
 assert的作用是现计算表达式 expression ，如果其值为假（即为0），那么它先向stderr打印一条出错信息，然后通过调用 abort 来终止程序运行。
-已放弃使用assert()的缺点是，频繁的调用会极大的影响程序的性能，增加额外的开销。在调试结束后，可以通过在包含#include <assert.h>的语句之前插入 #define NDEBUG 来禁用assert调用
+已放弃使用assert()的缺点是，频繁的调用会极大的影响程序的性能，增加额外的开销。在调试结束后，可以通过在包含#include <assert.h>的语句之前插入 
+#define NDEBUG 来禁用assert调用
+
+
+#include <sys/types.h>
+#include <sys/socket.h>
+int getsockopt(int sock, int level, int optname, void *optval, socklen_t *optlen);
+int setsockopt(int sock, int level, int optname, const void *optval, socklen_t optlen);
+功能描述：
+获取或者设置与某个套接字关联的选 项。选项可能存在于多层协议中，它们总会出现在最上面的套接字层。当操作套接字选项时，
+选项位于的层和选项的名称必须给出。为了操作套接字层的选项，应该 将层的值指定为SOL_SOCKET。为了操作其它层的选项，控制选
+项的合适协议号必须给出。例如，为了表示一个选项由TCP协议解析，层应该设定为协议号TCP
+
+参数：  
+sock：将要被设置或者获取选项的套接字。
+level：选项所在的协议层。
+optname：需要访问的选项名。
+optval：对于getsockopt()，指向返回选项值的缓冲。对于setsockopt()，指向包含新选项值的缓冲。
+optlen：对于getsockopt()，作为入口参数时，选项值的最大长度。作为出口参数时，选项值的实际长度。对于setsockopt()，现选项的长度。
+
+返回说明：
+成功执行时，返回0。失败返回-1，errno被设为以下的某个值  
+EBADF：sock不是有效的文件描述词
+EFAULT：optval指向的内存并非有效的进程空间
+EINVAL：在调用setsockopt()时，optlen无效
+ENOPROTOOPT：指定的协议层不能识别选项
+ENOTSOCK：sock描述的不是套接字
+
+level指定控制套接字的层次.可以取三种值:
+1)SOL_SOCKET:通用套接字选项.
+2)IPPROTO_IP:IP选项.
+3)IPPROTO_TCP:TCP选项.　
+optname指定控制的方式(选项的名称),
+
+optval获得或者是设置套接字选项.根据选项名称的数据类型进行转换　
+选项名称　　　　　　　　说明　　　　　　　　　　　　　　　　　　数据类型
+					SOL_SOCKET
+SO_BROADCAST　　　　　　允许发送广播数据　　　　　　　　　　　　int
+SO_DEBUG　　　　　　　　允许调试　　　　　　　　　　　　　　　　int
+SO_DONTROUTE　　　　　　不查找路由　　　　　　　　　　　　　　　int
+SO_ERROR　　　　　　　　获得套接字错误　　　　　　　　　　　　　int
+SO_KEEPALIVE　　　　　　保持连接　　　　　　　　　　　　　　　　int
+SO_LINGER　　　　　　　 延迟关闭连接　　　　　　　　　　　　　　struct linger
+SO_OOBINLINE　　　　　　带外数据放入正常数据流　　　　　　　　　int
+SO_RCVBUF　　　　　　　 接收缓冲区大小　　　　　　　　　　　　　int
+SO_SNDBUF　　　　　　　 发送缓冲区大小　　　　　　　　　　　　　int
+SO_RCVLOWAT　　　　　　 接收缓冲区下限　　　　　　　　　　　　　int
+SO_SNDLOWAT　　　　　　 发送缓冲区下限　　　　　　　　　　　　　int
+SO_RCVTIMEO　　　　　　 接收超时　　　　　　　　　　　　　　　　struct timeval
+SO_SNDTIMEO　　　　　　 发送超时　　　　　　　　　　　　　　　　struct timeval
+SO_REUSERADDR　　　　　 允许重用本地地址和端口　　　　　　　　　int
+SO_TYPE　　　　　　　　 获得套接字类型　　　　　　　　　　　　　int
+SO_BSDCOMPAT　　　　　　与BSD系统兼容　　　　　　　　　　　　　 int
+					IPPROTO_IP
+IP_HDRINCL　　　　　　　在数据包中包含IP首部　　　　　　　　　　int
+IP_OPTINOS　　　　　　　IP首部选项　　　　　　　　　　　　　　　int
+IP_TOS　　　　　　　　　服务类型
+IP_TTL　　　　　　　　　生存时间　　　　　　　　　　　　　　　　int
+					IPPRO_TCP
+TCP_MAXSEG　　　　　　　TCP最大数据段的大小　　　　　　　　　　 int
+TCP_NODELAY　　　　　　 不使用Nagle算法　　　　　　　　　　　　 int
+
+返回说明：  
+成功执行时，返回0。失败返回-1，errno被设为以下的某个值  
+EBADF：sock不是有效的文件描述词
+EFAULT：optval指向的内存并非有效的进程空间
+EINVAL：在调用setsockopt()时，optlen无效
+ENOPROTOOPT：指定的协议层不能识别选项
+ENOTSOCK：sock描述的不是套接字
+
+SO_RCVBUF和SO_SNDBUF每个套接口都有一个发送缓冲区和一个接收缓冲区，使用这两个套接口选项可以改变缺省缓冲区大小
+
+// 接收缓冲区
+int nRecvBuf=32*1024;         //设置为32K
+setsockopt(s,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
+//发送缓冲区
+int nSendBuf=32*1024;//设置为32K
+setsockopt(s,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
+
+当设置TCP套接口接收缓冲区的大小时，函数调用顺序是很重要的，因为TCP的窗口规模选项是在建立连接时用SYN与对方互换
+得到的。对于客户，O_RCVBUF选项必须在connect之前设置；对于服务器，SO_RCVBUF选项必须在listen前设置。
+
+每个套接口都有一个发送缓冲区和一个接收缓冲区。 接收缓冲区被TCP和UDP用来将接收到的数据一直保存到由应用进程来读。
+TCP：TCP通告另一端的窗口大小。 TCP套接口接收缓冲区不可能溢出，因为对方不允许发出超过所通告窗口大小的数据。 这就是TCP的
+流量控制，如果对方无视窗口大小而发出了超过窗口大小的数据，则接 收方TCP将丢弃它。 UDP：当接收到的数据报装不进套接口接收缓
+冲区时，此数据报就被丢弃。UDP是没有流量控制的；快的发送者可以很容易地就淹没慢的接收者，导致接收方的UDP丢弃数据报。
+
+
+epoll的接口非常简单，一共就三个函数：
+1. int epoll_create(int size);
+创建一个epoll的句柄，size用来告诉内核这个监听的数目一共有多大。这个参数不同于select()中的第一个参数，给出最大监听的fd+1的值。需要注意的是，当创建好
+epoll句柄后，它就是会占用一个fd值，在linux下如果查看/proc/进程id/fd/，是能够看到这个fd的，所以在使用完epoll后，必须调用close()关闭，否则可能导致fd被耗尽。
+出错时，返回-1，设置errno为下列值之一：
+EINVAL   size不是正数
+ENFILE    系统达到打开文件数的上限
+ENOMEN    没有足够内存完成该次操作。
+
+2. int epoll_ctl(int epfd, int op, int fd, struct epoll_event* event);
+   epoll的事件注册函数，即注册要监听的事件类型。
+   第一个参数是epoll_create()的返回值，
+   第二个参数表示动作，用三个宏来表示：
+   EPOLL_CTL_ADD：注册新的fd到epfd中；
+   EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
+   EPOLL_CTL_DEL：从epfd中删除一个fd；
+   第三个参数是需要监听的fd，
+   第四个参数是告诉内核需要监听什么事，struct epoll_event结构如下：
+   struct epoll_event {
+  __uint32_t events; /* Epoll events */
+  epoll_data_t data; /* User data variable */
+};
+
+typedef union epoll_data {
+	void *ptr;
+	int fd;
+	__uint32_t u32;
+	__uint64_t u64;
+} epoll_data_t;
+
+ events可以是以下几个宏的集合：
+
+   EPOLLIN ： 表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；
+   EPOLLOUT： 表示对应的文件描述符可以写；
+   EPOLLPRI： 表示对应的文件描述符有紧急的数据可读（这里应该表示有带外数据到来）；
+   EPOLLERR： 表示对应的文件描述符发生错误；
+   EPOLLHUP： 表示对应的文件描述符被挂断；
+   EPOLLET： 将 EPOLL设为边缘触发(Edge Triggered)模式（默认为水平触发），这是相对于水平触发(Level Triggered)来说的。
+   EPOLLONESHOT： 只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里
+
+3. int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+等待事件的产生。参数events 用来从内核得到事件的集合，maxevents 告之内核这个events 有多大，这个maxevents 的值不能大于创建epoll_create()时的size，参数
+timeout是超时时间（毫秒，0会立即返回，-1将不确定，也有说法说是永久阻塞）。该函数返回需要处理的事件数目，如返回0表示已超时
+
+4. EPOLL事件有两种模型：
+
+Edge Triggered (ET) 边缘触发 只有数据到来，才触发，不管缓存区中是否还有数据。
+Level Triggered (LT) 水平触发 只要有数据都会触发。

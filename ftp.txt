@@ -1,0 +1,8 @@
+#安装
+apt-get install vsftpd
+
+#开启ftp服务
+service vsftpd start
+
+看下是否启动成功
+netstat -nltp | grep 21
