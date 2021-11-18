@@ -57,8 +57,8 @@ assert的作用是现计算表达式 expression ，如果其值为假（即为0�
 int getsockopt(int sock, int level, int optname, void *optval, socklen_t *optlen);
 int setsockopt(int sock, int level, int optname, const void *optval, socklen_t optlen);
 功能描述：
-获取或者设置与某个套接字关联的选 项。选项可能存在于多层协议中，它们总会出现在最上面的套接字层。当操作套接字选项时，
-选项位于的层和选项的名称必须给出。为了操作套接字层的选项，应该 将层的值指定为SOL_SOCKET。为了操作其它层的选项，控制选
+获取或者设置与某个套接字关联的选项。选项可能存在于多层协议中，它们总会出现在最上面的套接字层。当操作套接字选项时，
+选项位于的层和选项的名称必须给出。为了操作套接字层的选项，应该将层的值指定为SOL_SOCKET。为了操作其它层的选项，控制选
 项的合适协议号必须给出。例如，为了表示一个选项由TCP协议解析，层应该设定为协议号TCP
 
 参数：  
@@ -138,8 +138,9 @@ TCP：TCP通告另一端的窗口大小。 TCP套接口接收缓冲区不可能�
 
 epoll的接口非常简单，一共就三个函数：
 1. int epoll_create(int size);
-创建一个epoll的句柄，size用来告诉内核这个监听的数目一共有多大。这个参数不同于select()中的第一个参数，给出最大监听的fd+1的值。需要注意的是，当创建好
-epoll句柄后，它就是会占用一个fd值，在linux下如果查看/proc/进程id/fd/，是能够看到这个fd的，所以在使用完epoll后，必须调用close()关闭，否则可能导致fd被耗尽。
+创建一个epoll的句柄，size用来告诉内核这个监听的数目一共有多大。这个参数不同于select()中的第一个参数，给出最大监听的fd+1的值。需要注意的是，当
+创建好epoll句柄后，它就是会占用一个fd值，在linux下如果查看/proc/进程id/fd/，是能够看到这个fd的，所以在使用完epoll后，必须调用close()关闭，否则
+可能导致fd被耗尽。
 出错时，返回-1，设置errno为下列值之一：
 EINVAL   size不是正数
 ENFILE    系统达到打开文件数的上限
@@ -177,10 +178,21 @@ typedef union epoll_data {
    EPOLLONESHOT： 只监听一次事件，当监听完这次事件之后，如果还需要继续监听这个socket的话，需要再次把这个socket加入到EPOLL队列里
 
 3. int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
-等待事件的产生。参数events 用来从内核得到事件的集合，maxevents 告之内核这个events 有多大，这个maxevents 的值不能大于创建epoll_create()时的size，参数
-timeout是超时时间（毫秒，0会立即返回，-1将不确定，也有说法说是永久阻塞）。该函数返回需要处理的事件数目，如返回0表示已超时
+等待事件的产生。参数events 用来从内核得到事件的集合，maxevents告之内核这个events有多大，这个maxevents的值不能大于创建epoll_create()时的size，
+参数timeout是超时时间（毫秒，0会立即返回，-1将不确定，也有说法说是永久阻塞）。该函数返回需要处理的事件数目，如返回0表示已超时
 
 4. EPOLL事件有两种模型：
 
 Edge Triggered (ET) 边缘触发 只有数据到来，才触发，不管缓存区中是否还有数据。
 Level Triggered (LT) 水平触发 只要有数据都会触发。
+
+
+#include <sys/types.h>
+#include <sys/socket.h>
+int socketpair(int d, int type, int protocol, int sv[2])；
+socketpair()函数用于创建一对无名的、相互连接的套接子。 
+如果函数成功，则返回0，创建好的套接字分别是sv[0]和sv[1]；否则返回-1，错误码保存于errno中。
+1. 这对套接字可以用于全双工通信，每一个套接字既可以读也可以写。例如，可以往sv[0]中写，从sv[1]中读；或者从sv[1]中写，从sv[0]中读； 
+2. 如果往一个套接字(如sv[0])中写入后，再从该套接字读时会阻塞，只能在另一个套接字中(sv[1])上读成功； 
+3. 读、写操作可以位于同一个进程，也可以分别位于不同的进程，如父子进程。如果是父子进程时，一般会功能分离，一个进程用来读，一个用来写。因为文件
+描述副sv[0]和sv[1]是进程共享的，所以读的进程要关闭写描述符, 反之，写的进程关闭读描述符。
